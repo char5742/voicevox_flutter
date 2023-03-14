@@ -20,9 +20,9 @@ class VoicevoxFlutterPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "setModelPath") {
-      final String path = call.argument("path")
-      Os.setenv("VV_MODELS_ROOT_DIR", path,true)
-      result.success()
+      val path = call.argument<String>("path")
+      Os.setenv("VV_MODELS_ROOT_DIR", path, true)
+      result.success("Success")
     } else {
       result.notImplemented()
     }
