@@ -44,3 +44,7 @@ android {
         minSdkVersion 16
     }
 }
+
+dependencies{
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.13.1'
+}
