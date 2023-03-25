@@ -1,11 +1,8 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-// import 'c_warrper.dart';
 import 'generated_bindings.dart';
 import 'voicevox_flutter_platform_interface.dart';
 
