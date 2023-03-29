@@ -52,7 +52,7 @@ class VoicevoxFlutter extends VoicevoxCoreLibrary {
     return query;
   }
 
-  Future<void> synthesis(String query, String outputPath) async {
+  Future<void> synthesis(String query, String outputPath, int speakerId) async {
     final synthesisOptions = voicevox_make_default_synthesis_options();
     synthesisOptions.enable_interrogative_upspeak = true;
     final Pointer<UintPtr> outputWavLengthPtr = calloc<UintPtr>();
@@ -61,7 +61,7 @@ class VoicevoxFlutter extends VoicevoxCoreLibrary {
     final queryPtr = query.toNativeUtf8();
     final code = voicevox_synthesis(
       queryPtr.cast<Char>(),
-      0,
+      speakerId,
       synthesisOptions,
       outputWavLengthPtr,
       outputWavPtr,

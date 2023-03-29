@@ -9,12 +9,12 @@ class NativeVoiceService {
     return await VoicevoxFlutter.instance.audioQuery(text);
   }
 
-  Future<String> synthesis(String query) async {
+  Future<String> synthesis(String query, int speakerId) async {
     final wavFile =
         File('${(await getApplicationDocumentsDirectory()).path}/voice.wav');
     final watch = Stopwatch();
     watch.start();
-    await VoicevoxFlutter.instance.synthesis(query, wavFile.path);
+    await VoicevoxFlutter.instance.synthesis(query, wavFile.path, speakerId);
     watch.stop();
     debugPrint("${watch.elapsedMilliseconds}ms");
     return wavFile.path;

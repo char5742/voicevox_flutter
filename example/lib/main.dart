@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     final query = await service.audioQuery(controller.text);
-                    final wavPath = await service.synthesis(query);
+                    final wavPath = await service.synthesis(query, 0);
                     await audioPlayer.play(DeviceFileSource(wavPath));
                   },
                   child: const Text('再生'),
