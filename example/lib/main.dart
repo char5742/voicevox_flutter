@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
                 TextField(controller: controller),
                 ElevatedButton(
                   onPressed: () async {
-                    final query = await service.audioQuery(controller.text);
+                    final query = service.audioQuery(controller.text);
                     final wavPath = await service.synthesis(query, 0);
                     await audioPlayer.play(DeviceFileSource(wavPath));
                   },
