@@ -8,9 +8,9 @@ example app
 
 # 使い方
 
-voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`、`assets/model`を置き換えてください。
+voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`を置き換えてください。
 
-自分のFlutterアプリで使用する場合は以下
+自分のFlutterアプリで使用する場合は以下のようにしてください。
 
 pubspec.yaml
 ```yaml
@@ -25,7 +25,10 @@ flutter:
 
 ```
 
-実際の使用方法はexampleを参考にしてください。
+modelフォルダは公式ライブラリに同梱されています。
+openjtalkは[こちら](https://open-jtalk.sourceforge.net/)からダウンロードできます。
+
+実際の使用方法は[example](example)を参考にしてください。
 
 # 高レベルAPI
 VoicevoxFlutterクラスは現在audioQuery, synthesis, tts のみをサポートしています。
@@ -33,3 +36,6 @@ VoicevoxFlutterクラスは現在audioQuery, synthesis, tts のみをサポー�
 # 例レベルAPI
 [voicevox_flutter/generated_bindings.dart](lib/generated_bindings.dart)に[ffigen](https://github.com/dart-lang/ffigen)で生成しただけのものがあります。
 
+
+# ライセンス
+MITライセンスが適用されています。[LICENSE](LICENSE)を参照してください。
