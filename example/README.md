@@ -8,3 +8,5 @@ voicevox_flutter を使ったサンプルアプリ
 
 <img src="../screen_shot/sample.jpg" width="320px"/>
 
+## 注意
+model フォルダにある onnx モデルはダミーのため、ノイズの混じった音声が出力されます
