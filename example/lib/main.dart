@@ -30,7 +30,9 @@ class MyApp extends StatelessWidget {
                 TextField(controller: controller),
                 ElevatedButton(
                   onPressed: () async {
-                    final query = service.audioQuery(controller.text);
+                    // 話者IDを変更すれば声を変えられます。
+                    // 現在は 0 に設定
+                    final query = service.audioQuery(controller.text, 0);
                     final wavPath = await service.synthesis(query, 0);
                     await audioPlayer.play(DeviceFileSource(wavPath));
                   },
