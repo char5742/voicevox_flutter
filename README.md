@@ -7,7 +7,7 @@ example app
 
 <img src="screen_shot/sample.jpg" width="320px"/>
 
-# 使い方
+## 使い方
 
 voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`を置き換えてください。
 
@@ -31,12 +31,12 @@ openjtalkは[こちら](https://open-jtalk.sourceforge.net/)からダウンロ�
 
 実際の使用方法は[example](example)を参考にしてください。
 
-# 高レベルAPI
+## 高レベルAPI
 VoicevoxFlutterクラスは現在audioQuery, synthesis, tts のみをサポートしています。
 
-# 例レベルAPI
+## 低レベルAPI
 [voicevox_flutter/generated_bindings.dart](lib/generated_bindings.dart)に[ffigen](https://github.com/dart-lang/ffigen)で生成しただけのものがあります。
 
 
-# ライセンス
+## ライセンス
 MITライセンスが適用されています。[LICENSE](LICENSE)を参照してください。
