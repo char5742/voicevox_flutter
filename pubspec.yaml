@@ -1,6 +1,6 @@
 name: voicevox_flutter
 description: voicevox_core wrapper.
-version: 0.0.1
+version: 0.1.0
 homepage:
 
 environment:
