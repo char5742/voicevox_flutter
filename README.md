@@ -1,11 +1,7 @@
 # voicevox_flutter
 
-[voicevox_core](https://github.com/VOICEVOX/voicevox_core) の 非公式 ラッパーです。
-※ 現在はAndroidのみで動作します。
-
-example app
-
-<img src="screen_shot/sample.jpg" width="320px"/>
+[voicevox_core](https://github.com/VOICEVOX/voicevox_core) の 非公式 ラッパーです。  
+**※現在はAndroidのみで動作します。**
 
 ## 使い方
 
