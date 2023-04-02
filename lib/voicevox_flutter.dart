@@ -144,6 +144,16 @@ class VoicevoxFlutter extends VoicevoxCoreLibrary {
     calloc.free(outputWavPtr);
     return outputPath;
   }
+
+  /// モデルを読み込む
+  ///
+  /// [id] 読み込むモデルの話者ID
+  void loadModel(int id) {
+    final code = voicevox_load_model(id);
+    if (code != VoicevoxResultCode.VOICEVOX_RESULT_OK) {
+      throw Exception('VoicevoxResult: ${errorcodeToText(code)}');
+    }
+  }
 }
 
 /// VoicevoxCoreLibraryのエラーコードをテキストに変換する
