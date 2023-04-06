@@ -1,10 +1,10 @@
 name: voicevox_flutter
 description: voicevox_core wrapper.
-version: 0.1.1
+version: 0.1.2
 homepage:
 
 environment:
-  sdk: '>=3.0.0-218.1.beta <4.0.0'
+  sdk: '>=2.19.6 <3.0.0'
   flutter: ">=2.5.0"
 
 dependencies:
