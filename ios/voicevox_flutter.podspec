@@ -20,4 +20,6 @@ A new Flutter plugin project.
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
+  # Change this libonnxruntime.1.13.1.dylib to your own onnxruntime version
+  s.vendored_libraries = 'Libraries/libvoicevox_core.dylib', 'Libraries/libonnxruntime.1.14.0.dylib'
 end

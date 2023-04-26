@@ -1,11 +1,12 @@
 # voicevox_flutter
 
 [voicevox_core](https://github.com/VOICEVOX/voicevox_core) の 非公式 ラッパーです。  
-**※現在はAndroidのみで動作します。**
 
 ## 使い方
-
+### Android
 voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`を置き換えてください。
+### iOS
+voicevox_coreのiOS向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`ios/Libraries`に`libonnxruntime.dylib`と`libvoicevox_core.dylib`を置いてください。また、`ios/voicevox_flutter.podspec`内の s.vendored_libraries を適切なパスに変更してください。
 
 自分のFlutterアプリで使用する場合は以下のようにしてください。
 
