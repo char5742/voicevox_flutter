@@ -8,8 +8,8 @@ import 'voicevox_flutter_platform_interface.dart';
 
 /// VoicevoxCoreLibraryのラッパークラス
 class VoicevoxFlutter extends VoicevoxCoreLibrary {
-  static final VoicevoxFlutter instance =
-      VoicevoxFlutter._(DynamicLibrary.open('libvoicevox_core.so'));
+  static final VoicevoxFlutter instance = VoicevoxFlutter._(DynamicLibrary.open(
+      Platform.isAndroid ? 'libvoicevox_core.so' : 'libvoicevox_core.dylib'));
   VoicevoxFlutter._(super.dynamicLibrary);
 
   Future<void> initialize({
