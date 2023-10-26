@@ -31,9 +31,9 @@ class MyApp extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     // speakerIdを変更すれば話者を変えられます。
-                    const speakerId = 0;
+                    const speakerId = 1;
                     final query =
-                        service.audioQuery(controller.text, speakerId);
+                        await service.audioQuery(controller.text, speakerId);
                     final wavPath = await service.synthesis(query, speakerId);
                     await audioPlayer.play(DeviceFileSource(wavPath));
                   },

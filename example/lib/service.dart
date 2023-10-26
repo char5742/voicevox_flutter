@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:voicevox_flutter/voicevox_flutter.dart';
@@ -7,141 +8,191 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 class NativeVoiceService {
+  late Isolate isolate;
+  late SendPort sendPort;
   Future<void> initialize() async {
-    return await VoicevoxFlutter.instance.initialize(
-      modelPath: await _setModel(),
-      openJdkDictPath: await _setOpenJdkDict(),
-      cpuNumThreads: 4,
-    );
+    final receivePort = ReceivePort();
+    final rootToken = RootIsolateToken.instance!;
+    isolate =
+        await Isolate.spawn<(SendPort, RootIsolateToken)>((message) async {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(message.$2);
+
+      final receivePort = ReceivePort();
+      message.$1.send(receivePort.sendPort);
+
+      receivePort.listen((message) async {
+        switch (message['method']) {
+          case 'initialize':
+            await _initialize(
+                message['openJdkDictPath'], message['modelPathList']);
+            message['sendPort'].send(null);
+            break;
+          case 'audioQuery':
+            message['sendPort']
+                .send(_audioQuery(message['text'], message['styleId']));
+            break;
+          case 'synthesis':
+            message['sendPort']
+                .send(await _synthesis(message['query'], message['styleId']));
+            break;
+          case 'tts':
+            message['sendPort']
+                .send(await _tts(message['query'], message['styleId']));
+            break;
+        }
+      });
+    }, (receivePort.sendPort, rootToken));
+    sendPort = await receivePort.first as SendPort;
+
+    final r = ReceivePort();
+    sendPort.send({
+      'method': 'initialize',
+      'openJdkDictPath': await _setOpenJdkDict(),
+      'modelPathList': await _setModel(),
+      'sendPort': r.sendPort,
+    });
+    await r.first;
   }
 
   /// AudioQuery を生成する
-  String audioQuery(String text, int speakerId) {
-    return VoicevoxFlutter.instance.audioQuery(text, speakerId: speakerId);
+  Future<String> audioQuery(String text, int styleId) async {
+    final receivePort = ReceivePort();
+    sendPort.send({
+      'method': 'audioQuery',
+      'text': text,
+      'styleId': styleId,
+      'sendPort': receivePort.sendPort,
+    });
+    return (await receivePort.first) as String;
   }
 
   /// AudioQueryから合成を実行する
-  Future<String> synthesis(String query, int speakerId) async {
-    final wavFile =
-        File('${(await getApplicationDocumentsDirectory()).path}/voice.wav');
-    final watch = Stopwatch();
-    watch.start();
-    await compute(_synthesis, SynthesisData(query, speakerId, wavFile.path));
-    watch.stop();
-    // 合成にかかった時間を表示する
-    debugPrint("${watch.elapsedMilliseconds}ms");
-    return wavFile.path;
+  Future<String> synthesis(String query, int styleId) async {
+    final receivePort = ReceivePort();
+    sendPort.send({
+      'method': 'synthesis',
+      'query': query,
+      'styleId': styleId,
+      'sendPort': receivePort.sendPort,
+    });
+    return (await receivePort.first) as String;
   }
 
   /// テキスト音声合成を実行する
-  Future<String> tts(String query, int speakerId) async {
-    final wavFile =
-        File('${(await getApplicationDocumentsDirectory()).path}/voice.wav');
-    final watch = Stopwatch();
-    watch.start();
-    await compute(_tts, TTSData(query, speakerId, wavFile.path));
-    watch.stop();
-    // 合成にかかった時間を表示する
-    debugPrint("${watch.elapsedMilliseconds}ms");
-    return wavFile.path;
+  Future<String> tts(String query, int styleId) {
+    final receivePort = ReceivePort();
+    sendPort.send({
+      'method': 'tts',
+      'query': query,
+      'styleId': styleId,
+      'sendPort': receivePort.sendPort,
+    });
+    return receivePort.first as Future<String>;
   }
 
-  /// アセットからアプリケーションディレクトリにファイルをコピーする
-  Future<void> _copyFile(
-      String filename, String assetsDir, String targetDirPath) async {
-    final data = await rootBundle.load('$assetsDir/$filename');
-    final bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    File('$targetDirPath/$filename').writeAsBytesSync(bytes);
-  }
-
-  /// アセットからアプリケーションディレクトリに`open_jtalk_dict`をコピーする
-  Future<String> _setOpenJdkDict() async {
-    final openJdkDictDir = Directory(
-        '${(await getApplicationSupportDirectory()).path}/open_jtalk_dic_utf_8-1.11');
-
-    if (!openJdkDictDir.existsSync()) {
-      openJdkDictDir.createSync();
-      const openJdkDicAssetDir = 'assets/open_jtalk_dic_utf_8-1.11';
-
-      final manifestContent = await rootBundle.loadString('AssetManifest.json');
-      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-      // open_jtalk_dic_utf_8-1.11ディレクトリ以下のファイルをコピーする
-      manifestMap.keys
-          .where((e) => e.contains(openJdkDicAssetDir))
-          .map((e) => p.basename(e))
-          .forEach((name) async {
-        await _copyFile(name, openJdkDicAssetDir, openJdkDictDir.path);
-      });
-    }
-    return openJdkDictDir.path;
-  }
-
-  /// アセットからアプリケーションディレクトリに`model`をコピーする
-  Future<String> _setModel() async {
-    final modelDir =
-        Directory('${(await getApplicationSupportDirectory()).path}/model');
-    if (!modelDir.existsSync()) {
-      modelDir.createSync();
-      const modelAssetDir = 'assets/model';
-
-      final manifestContent = await rootBundle.loadString('AssetManifest.json');
-      final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-      // modelディレクトリ以下のファイルをコピーする
-      manifestMap.keys
-          .where((e) => e.contains(modelAssetDir))
-          .map((e) => p.basename(e))
-          .forEach((name) async {
-        await _copyFile(name, modelAssetDir, modelDir.path);
-      });
-    }
-    return modelDir.path;
+  void dispose() async {
+    isolate.kill();
   }
 }
 
-class SynthesisData {
-  final String query;
-  final int speakerId;
-  final String outputPath;
-  final bool? enableInterrogativeUpspeak;
-  SynthesisData(
-    this.query,
-    this.speakerId,
-    this.outputPath, {
-    this.enableInterrogativeUpspeak,
-  });
+Future<void> _initialize(
+    String openJdkDictPath, List<String> modelPathList) async {
+  await VoicevoxFlutter.instance.initialize(
+    openJdkDictPath: openJdkDictPath,
+    cpuNumThreads: 4,
+  );
+  for (final modelPath in modelPathList) {
+    VoicevoxFlutter.instance.loadVoiceModel(modelPath);
+  }
 }
 
-void _synthesis(SynthesisData data) {
+String _audioQuery(String text, int styleId) {
+  return VoicevoxFlutter.instance.audioQuery(text, styleId: styleId);
+}
+
+Future<String> _synthesis(String query, int styleId) async {
+  final wavFile = File(
+      '${(await getApplicationDocumentsDirectory()).path}/${query.hashCode}.wav');
+  final watch = Stopwatch();
+  watch.start();
   VoicevoxFlutter.instance.synthesis(
-    data.query,
-    speakerId: data.speakerId,
-    outputPath: data.outputPath,
-    enableInterrogativeUpspeak: data.enableInterrogativeUpspeak ?? true,
+    query,
+    styleId: styleId,
+    outputPath: wavFile.path,
   );
+  watch.stop();
+  // 合成にかかった時間を表示する
+  debugPrint("${watch.elapsedMilliseconds}ms");
+  return wavFile.path;
 }
 
-class TTSData {
-  final String text;
-  final int speakerId;
-  final String outputPath;
-  final bool? kana;
-  final bool? enableInterrogativeUpspeak;
-  TTSData(
-    this.text,
-    this.speakerId,
-    this.outputPath, {
-    this.kana,
-    this.enableInterrogativeUpspeak,
-  });
-}
-
-void _tts(TTSData data) {
+/// テキスト音声合成を実行する
+Future<String> _tts(String query, int styleId) async {
+  final wavFile =
+      File('${(await getApplicationDocumentsDirectory()).path}/voice.wav');
+  final watch = Stopwatch();
+  watch.start();
   VoicevoxFlutter.instance.tts(
-    data.text,
-    speakerId: data.speakerId,
-    outputPath: data.outputPath,
-    kana: data.kana ?? false,
-    enableInterrogativeUpspeak: data.enableInterrogativeUpspeak ?? true,
+    query,
+    styleId: styleId,
+    outputPath: wavFile.path,
   );
+  watch.stop();
+  // 合成にかかった時間を表示する
+  debugPrint("${watch.elapsedMilliseconds}ms");
+  return wavFile.path;
+}
+
+/// アセットからアプリケーションディレクトリにファイルをコピーする
+Future<void> _copyFile(
+    String filename, String assetsDir, String targetDirPath) async {
+  final data = await rootBundle.load('$assetsDir/$filename');
+  final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  File('$targetDirPath/$filename').writeAsBytesSync(bytes);
+}
+
+/// アセットからアプリケーションディレクトリに`open_jtalk_dict`をコピーする
+Future<String> _setOpenJdkDict() async {
+  final openJdkDictDir = Directory(
+      '${(await getApplicationSupportDirectory()).path}/open_jtalk_dic_utf_8-1.11');
+
+  if (!openJdkDictDir.existsSync()) {
+    openJdkDictDir.createSync();
+    const openJdkDicAssetDir = 'assets/open_jtalk_dic_utf_8-1.11';
+
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // open_jtalk_dic_utf_8-1.11ディレクトリ以下のファイルをコピーする
+    manifestMap.keys
+        .where((e) => e.contains(openJdkDicAssetDir))
+        .map((e) => p.basename(e))
+        .forEach((name) async {
+      await _copyFile(name, openJdkDicAssetDir, openJdkDictDir.path);
+    });
+  }
+  return openJdkDictDir.path;
+}
+
+/// アセットからアプリケーションディレクトリに`model`をコピーする
+Future<List<String>> _setModel() async {
+  final modelDir =
+      Directory('${(await getApplicationSupportDirectory()).path}/model');
+  final modelPathList = <String>[];
+  modelDir.createSync();
+  const modelAssetDir = 'assets/model';
+
+  final manifestContent = await rootBundle.loadString('AssetManifest.json');
+  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+
+  // modelディレクトリ以下のファイルをコピーする
+  final vvmFileList = manifestMap.keys
+      .where((e) => e.contains(modelAssetDir))
+      .map((e) => p.basename(e))
+      .where((e) => p.extension(e) == '.vvm');
+  for (final name in vvmFileList) {
+    await _copyFile(name, modelAssetDir, modelDir.path);
+    modelPathList.add(p.join(modelDir.path, name));
+  }
+
+  return modelPathList;
 }

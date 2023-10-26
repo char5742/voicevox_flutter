@@ -8,9 +8,4 @@ class MethodChannelVoicevoxFlutter extends VoicevoxFlutterPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('voicevox_flutter');
-
-  @override
-  Future<void> setModelPath(String path) async {
-    await methodChannel.invokeMethod('setModelPath', {"path": path});
-  }
 }

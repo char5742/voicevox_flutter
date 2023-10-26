@@ -22,9 +22,4 @@ abstract class VoicevoxFlutterPlatform extends PlatformInterface {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
-
-  /// `VV_MODELS_ROOT_DIR` 環境変数にモデルのパスをセットする
-  Future<void> setModelPath(String path) {
-    throw UnimplementedError('setModelPath() has not been implemented.');
-  }
 }
