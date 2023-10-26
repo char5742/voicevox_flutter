@@ -969,16 +969,16 @@ abstract class VoicevoxUserDictWordType {
   static const int VOICEVOX_USER_DICT_WORD_TYPE_SUFFIX = 4;
 }
 
-class OpenJtalkRc extends ffi.Opaque {}
+final class OpenJtalkRc extends ffi.Opaque {}
 
-class VoicevoxSynthesizer extends ffi.Opaque {}
+final class VoicevoxSynthesizer extends ffi.Opaque {}
 
-class VoicevoxUserDict extends ffi.Opaque {}
+final class VoicevoxUserDict extends ffi.Opaque {}
 
-class VoicevoxVoiceModel extends ffi.Opaque {}
+final class VoicevoxVoiceModel extends ffi.Opaque {}
 
 /// ::voicevox_synthesizer_new_with_initialize のオプション。
-class VoicevoxInitializeOptions extends ffi.Struct {
+final class VoicevoxInitializeOptions extends ffi.Struct {
   /// ハードウェアアクセラレーションモード
   @VoicevoxAccelerationMode1()
   external int acceleration_mode;
@@ -992,21 +992,21 @@ class VoicevoxInitializeOptions extends ffi.Struct {
 typedef VoicevoxAccelerationMode1 = ffi.Int32;
 
 /// ::voicevox_synthesizer_synthesis のオプション。
-class VoicevoxSynthesisOptions extends ffi.Struct {
+final class VoicevoxSynthesisOptions extends ffi.Struct {
   /// 疑問文の調整を有効にする
   @ffi.Bool()
   external bool enable_interrogative_upspeak;
 }
 
 /// ::voicevox_synthesizer_tts のオプション。
-class VoicevoxTtsOptions extends ffi.Struct {
+final class VoicevoxTtsOptions extends ffi.Struct {
   /// 疑問文の調整を有効にする
   @ffi.Bool()
   external bool enable_interrogative_upspeak;
 }
 
 /// ユーザー辞書の単語。
-class VoicevoxUserDictWord extends ffi.Struct {
+final class VoicevoxUserDictWord extends ffi.Struct {
   /// 表記
   external ffi.Pointer<ffi.Char> surface;
 
