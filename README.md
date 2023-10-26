@@ -4,10 +4,10 @@
 
 ## 使い方
 ### Android
-voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`を置き換えてください。
+voicevox_coreのAndroid向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`app/android/src/main/jniLibs/arm64-v8a/libvoicevox_core.so`に追加してください。
 ### iOS
-voicevox_coreのiOS向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、`ios/Libraries`に`libonnxruntime.dylib`と`libvoicevox_core.dylib`を置いてください。また、`ios/voicevox_flutter.podspec`内の s.vendored_libraries を適切なパスに変更してください。
-
+voicevox_coreのiOS向けライブラリを[公式](https://github.com/VOICEVOX/voicevox_core/releases)からダウンロードし、xcframeworkをFrameworks, Libraries, and Embedded Contentに追加してください。
+![](screen_shot/xcode_framework.png)
 自分のFlutterアプリで使用する場合は以下のようにしてください。
 
 pubspec.yaml
