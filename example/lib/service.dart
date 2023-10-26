@@ -21,24 +21,28 @@ class NativeVoiceService {
       message.$1.send(receivePort.sendPort);
 
       receivePort.listen((message) async {
+        message = message as Map<String, dynamic>;
         switch (message['method']) {
           case 'initialize':
             await _initialize(
-                message['openJdkDictPath'], message['modelPathList']);
-            message['sendPort'].send(null);
-            break;
+              message['openJdkDictPath'] as String,
+              message['modelPathList'] as List<String>,
+            );
+            (message['sendPort'] as SendPort).send(null);
           case 'audioQuery':
-            message['sendPort']
-                .send(_audioQuery(message['text'], message['styleId']));
-            break;
+            (message['sendPort'] as SendPort).send(
+              _audioQuery(message['text'] as String, message['styleId'] as int),
+            );
           case 'synthesis':
-            message['sendPort']
-                .send(await _synthesis(message['query'], message['styleId']));
-            break;
+            (message['sendPort'] as SendPort).send(
+              await _synthesis(
+                  message['query'] as String, message['styleId'] as int),
+            );
+
           case 'tts':
-            message['sendPort']
-                .send(await _tts(message['query'], message['styleId']));
-            break;
+            (message['sendPort'] as SendPort).send(
+              await _tts(message['query'] as String, message['styleId'] as int),
+            );
         }
       });
     }, (receivePort.sendPort, rootToken));
@@ -90,7 +94,7 @@ class NativeVoiceService {
     return receivePort.first as Future<String>;
   }
 
-  void dispose() async {
+  void dispose() {
     isolate.kill();
   }
 }
@@ -101,9 +105,7 @@ Future<void> _initialize(
     openJdkDictPath: openJdkDictPath,
     cpuNumThreads: 4,
   );
-  for (final modelPath in modelPathList) {
-    VoicevoxFlutter.instance.loadVoiceModel(modelPath);
-  }
+  modelPathList.forEach(VoicevoxFlutter.instance.loadVoiceModel);
 }
 
 String _audioQuery(String text, int styleId) {
@@ -113,8 +115,7 @@ String _audioQuery(String text, int styleId) {
 Future<String> _synthesis(String query, int styleId) async {
   final wavFile = File(
       '${(await getApplicationDocumentsDirectory()).path}/${query.hashCode}.wav');
-  final watch = Stopwatch();
-  watch.start();
+  final watch = Stopwatch()..start();
   VoicevoxFlutter.instance.synthesis(
     query,
     styleId: styleId,
@@ -122,7 +123,7 @@ Future<String> _synthesis(String query, int styleId) async {
   );
   watch.stop();
   // 合成にかかった時間を表示する
-  debugPrint("${watch.elapsedMilliseconds}ms");
+  debugPrint('${watch.elapsedMilliseconds}ms');
   return wavFile.path;
 }
 
@@ -130,8 +131,7 @@ Future<String> _synthesis(String query, int styleId) async {
 Future<String> _tts(String query, int styleId) async {
   final wavFile =
       File('${(await getApplicationDocumentsDirectory()).path}/voice.wav');
-  final watch = Stopwatch();
-  watch.start();
+  final watch = Stopwatch()..start();
   VoicevoxFlutter.instance.tts(
     query,
     styleId: styleId,
@@ -139,7 +139,7 @@ Future<String> _tts(String query, int styleId) async {
   );
   watch.stop();
   // 合成にかかった時間を表示する
-  debugPrint("${watch.elapsedMilliseconds}ms");
+  debugPrint('${watch.elapsedMilliseconds}ms');
   return wavFile.path;
 }
 
@@ -161,11 +161,11 @@ Future<String> _setOpenJdkDict() async {
     const openJdkDicAssetDir = 'assets/open_jtalk_dic_utf_8-1.11';
 
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    final manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
     // open_jtalk_dic_utf_8-1.11ディレクトリ以下のファイルをコピーする
     manifestMap.keys
         .where((e) => e.contains(openJdkDicAssetDir))
-        .map((e) => p.basename(e))
+        .map(p.basename)
         .forEach((name) async {
       await _copyFile(name, openJdkDicAssetDir, openJdkDictDir.path);
     });
@@ -182,12 +182,12 @@ Future<List<String>> _setModel() async {
   const modelAssetDir = 'assets/model';
 
   final manifestContent = await rootBundle.loadString('AssetManifest.json');
-  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+  final manifestMap = json.decode(manifestContent) as Map<String, dynamic>;
 
   // modelディレクトリ以下のファイルをコピーする
   final vvmFileList = manifestMap.keys
       .where((e) => e.contains(modelAssetDir))
-      .map((e) => p.basename(e))
+      .map(p.basename)
       .where((e) => p.extension(e) == '.vvm');
   for (final name in vvmFileList) {
     await _copyFile(name, modelAssetDir, modelDir.path);
